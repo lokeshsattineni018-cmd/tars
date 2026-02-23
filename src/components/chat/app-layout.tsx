@@ -23,7 +23,7 @@ export function AppLayout({ children }: { children?: React.ReactNode }) {
 
     // Default: Glassmorphism, floating elements, bouncy UI.
     return (
-        <div className="flex h-[100dvh] w-full overflow-hidden bg-zinc-50 dark:bg-zinc-950 p-0 sm:p-2 md:p-4 lg:p-8">
+        <div className="fixed inset-0 flex w-full overflow-hidden bg-zinc-50 dark:bg-zinc-950 p-0 sm:p-2 md:p-4 lg:p-8">
             <div className="flex flex-1 w-full max-w-[1500px] mx-auto overflow-hidden bg-white dark:bg-zinc-950 sm:rounded-2xl md:rounded-3xl border border-zinc-200 dark:border-zinc-800 shadow-2xl relative group/glass">
                 <div className={cn(
                     "flex-shrink-0",
