@@ -58,7 +58,7 @@ export function MessageContent({ message, isMe, onScrollToReply }: MessageConten
                             decoding="async"
                         />
                     </DialogTrigger>
-                    <DialogContent className="max-w-4xl p-0 bg-transparent border-none shadow-none flex items-center justify-center [&>button]:right-0 [&>button]:top-[-40px] [&>button]:text-white">
+                    <DialogContent className="max-w-4xl p-0 bg-transparent border-none shadow-none flex items-center justify-center [&>button]:right-2 [&>button]:top-2 sm:[&>button]:right-0 sm:[&>button]:top-[-40px] [&>button]:text-white [&>button]:bg-black/50 [&>button]:hover:bg-black/70 [&>button]:p-2 [&>button]:h-10 [&>button]:w-10 [&>button]:rounded-full [&>svg]:h-6 [&>svg]:w-6">
                         <DialogTitle className="sr-only">Image Preview</DialogTitle>
                         <img
                             src={message.imageUrl}
