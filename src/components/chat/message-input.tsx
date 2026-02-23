@@ -140,35 +140,32 @@ export function MessageInput({
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        const messageContent = content.trim();
-        if (!messageContent) return;
+        if (!content.trim()) return;
 
         setSendError(null);
-        setContent(""); // Clear immediately for instant feedback
-        setIsTyping(false);
-        setShowEmoji(false);
 
         try {
             if (editingMessage) {
                 await editMessage({
                     messageId: editingMessage.id,
-                    content: messageContent,
+                    content: content.trim(),
                 });
                 if (onCancelEdit) onCancelEdit();
             } else {
                 await sendMessage({
                     conversationId,
-                    content: messageContent,
+                    content: content.trim(),
                     type: "text",
                     replyToId: replyingTo?.id,
                 });
                 if (onCancelReply) onCancelReply();
             }
+            setContent("");
+            setIsTyping(false);
+            setShowEmoji(false);
         } catch (err) {
             console.error("Failed to send message:", err);
-            // Restore content if it fails so the user doesn't lose their message
-            setContent(messageContent);
-            setSendError(messageContent);
+            setSendError(content.trim());
         }
     };
 
@@ -178,12 +175,18 @@ export function MessageInput({
 
         try {
             setIsUploading(true);
+            setSendError(null);
             const postUrl = await generateUploadUrl();
             const result = await fetch(postUrl, {
                 method: "POST",
                 headers: { "Content-Type": file.type },
                 body: file,
             });
+
+            if (!result.ok) {
+                throw new Error(`Upload failed: ${result.statusText}`);
+            }
+
             const { storageId } = await result.json();
 
             await sendMessage({
@@ -193,19 +196,20 @@ export function MessageInput({
                 replyToId: replyingTo?.id,
             });
 
-            if (imageInputRef.current) {
-                imageInputRef.current.value = "";
-            }
             if (onCancelReply) onCancelReply();
         } catch (error) {
             console.error("Failed to upload image:", error);
+            setSendError("Failed to upload image. Please try again.");
         } finally {
             setIsUploading(false);
+            if (imageInputRef.current) {
+                imageInputRef.current.value = "";
+            }
         }
     };
 
     return (
-        <div className="p-3 relative flex flex-col gap-2 transition-colors duration-300 w-full bg-white/70 dark:bg-black/40 backdrop-blur-md border-t border-zinc-100 dark:border-zinc-800/60">
+        <div className="p-3 relative flex flex-col gap-2 transition-colors duration-300 w-full bg-white dark:bg-zinc-950 border-t border-zinc-100 dark:border-zinc-800/60">
             {sendError && (
                 <div className="flex items-center justify-between text-sm bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 px-4 py-2.5 rounded-xl border border-red-200 dark:border-red-800/50">
                     <span>Message failed to send.</span>
@@ -253,7 +257,7 @@ export function MessageInput({
             )}
             <form
                 onSubmit={handleSubmit}
-                className="flex items-center gap-2 px-4 py-2 transition-all w-full bg-zinc-100/80 dark:bg-zinc-900/80 rounded-full ring-1 ring-zinc-200 dark:ring-zinc-800 focus-within:ring-blue-500 backdrop-blur-sm shadow-sm"
+                className="flex items-center gap-2 px-4 py-2 transition-all w-full bg-zinc-100 dark:bg-zinc-900 rounded-full ring-1 ring-zinc-200 dark:ring-zinc-800 focus-within:ring-blue-500 shadow-sm"
             >
                 <input
                     type="file"

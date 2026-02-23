@@ -34,7 +34,7 @@ export function ChatHeader({ conversationId }: { conversationId: Id<"conversatio
     const isUserActive = otherMember?.lastSeen && Date.now() - otherMember.lastSeen < 60000;
 
     return (
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 p-4 z-30 w-full flex-shrink-0 transition-colors duration-300 border-b border-zinc-200/50 dark:border-zinc-800/50 bg-white/80 dark:bg-black/40 backdrop-blur-sm">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 p-4 z-30 w-full flex-shrink-0 transition-colors duration-300 border-b border-zinc-200/50 dark:border-zinc-800/50 bg-white dark:bg-zinc-950">
             <div className="flex items-center gap-3 w-full">
                 <Link href="/" className="md:hidden p-2 -ml-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition">
                     <ChevronLeft className="h-5 w-5" />

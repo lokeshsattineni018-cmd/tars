@@ -67,7 +67,7 @@ export function Sidebar() {
     });
 
     return (
-        <div className="flex h-full w-full flex-col transition-all duration-300 relative border-r border-zinc-200/50 dark:border-zinc-800/50 bg-white/80 dark:bg-black/40 backdrop-blur-sm">
+        <div className="flex h-full w-full flex-col transition-all duration-300 relative border-r border-zinc-200/50 dark:border-zinc-800/50 bg-white dark:bg-zinc-950">
             <div className="flex flex-col gap-4 p-4">
                 <div className="flex items-center justify-between">
                     <h1 className="text-2xl font-bold tracking-tight">Chats</h1>
