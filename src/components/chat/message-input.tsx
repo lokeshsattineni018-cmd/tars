@@ -310,7 +310,7 @@ export function MessageInput({
                                 setContent(e.target.value);
                                 setIsTyping(true);
                             }}
-                            placeholder="Message me ..."
+                            placeholder="Message me..."
                             className="flex-1 bg-transparent border-none focus:outline-none focus:ring-0 min-w-0 placeholder:text-zinc-400"
                             disabled={isUploading}
                         />
@@ -325,7 +325,7 @@ export function MessageInput({
                         className={cn(
                             "shrink-0 h-8 w-8 rounded-full transition-transform active:scale-95 ml-1 flex-shrink-0",
                             content.trim()
-                                ? "bg-green-600 hover:bg-blue-700 text-white shadow-md"
+                                ? "bg-green-600 hover:bg-green-700 text-white shadow-md"
                                 : "bg-zinc-200 dark:bg-zinc-800 text-zinc-500 hover:text-blue-500 hover:bg-zinc-300"
                         )}
                         disabled={isUploading}
