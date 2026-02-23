@@ -171,58 +171,74 @@ export function MessageList({
     return (
         <div className="relative flex-1 flex flex-col overflow-hidden transition-colors duration-500 bg-transparent">
             <PinnedBanner pinnedMessages={pinnedMessages || []} />
-            <div className="flex-1 overflow-y-auto flex flex-col pt-14 pb-4 space-y-4" onScroll={handleScroll}>
+            <div className="flex-1 overflow-y-auto flex flex-col pt-14 pb-4" onScroll={handleScroll}>
                 <div ref={observerTarget} className="h-1 w-full" />
                 <div className={cn("text-center text-xs text-zinc-500 py-2 h-8 transition-opacity duration-300", status === "LoadingMore" ? "opacity-100" : "opacity-0 invisible")}>
                     Loading older messages...
                 </div>
                 <AnimatePresence initial={false}>
-                    {messages.map((message: any) => (
-                        <motion.div
-                            key={message._id}
-                            layout
-                            initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                            transition={{
-                                opacity: { duration: 0.2 },
-                                layout: { type: "spring", bounce: 0.3, duration: 0.4 },
-                                y: { type: "spring", bounce: 0.4, duration: 0.5 },
-                                scale: { duration: 0.2 }
-                            }}
-                        >
-                            <MessageItem
+                    {messages.map((message: any, index: number) => {
+                        const previousMessage = index > 0 ? messages[index - 1] : null;
+                        const nextMessage = index < messages.length - 1 ? messages[index + 1] : null;
+
+                        const isConsecutive = previousMessage &&
+                            previousMessage.senderId === message.senderId &&
+                            (message._creationTime - previousMessage._creationTime < 5 * 60 * 1000);
+
+                        const isLastInGroup = !nextMessage ||
+                            nextMessage.senderId !== message.senderId ||
+                            (nextMessage._creationTime - message._creationTime >= 5 * 60 * 1000);
+
+                        return (
+                            <motion.div
                                 key={message._id}
-                                message={message}
-                                isMe={message.sender?.clerkId === currentUserId}
-                                isSelectMode={isSelectMode}
-                                isSelected={selectedMessageIds.has(message._id)}
-                                onSelect={(id) => {
-                                    setSelectedMessageIds(prev => {
-                                        const next = new Set(prev);
-                                        if (next.has(id)) next.delete(id);
-                                        else next.add(id);
-                                        return next;
-                                    });
+                                layout
+                                initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                transition={{
+                                    opacity: { duration: 0.2 },
+                                    layout: { type: "spring", bounce: 0.3, duration: 0.4 },
+                                    y: { type: "spring", bounce: 0.4, duration: 0.5 },
+                                    scale: { duration: 0.2 }
                                 }}
-                                currentUserId={currentUserId}
-                                meId={me?._id}
-                                otherMemberReadId={otherMemberReadId}
-                                onReply={onReply}
-                                onEdit={onEdit}
-                                onDelete={onDelete}
-                                onReaction={onReaction}
-                                onStar={onStar}
-                                onPin={onPin}
-                                onCopy={onCopy}
-                                onForward={(msg) => {
-                                    setMessagesToForward([msg]);
-                                    setForwardDialogOpen(true);
-                                }}
-                                onScrollToReply={handleScrollToReply}
-                                setIsSelectMode={setIsSelectMode}
-                            />
-                        </motion.div>
-                    ))}
+                                className={cn(isConsecutive ? "mt-1" : "mt-4")}
+                            >
+                                <MessageItem
+                                    key={message._id}
+                                    message={message}
+                                    isMe={message.sender?.clerkId === currentUserId}
+                                    isSelectMode={isSelectMode}
+                                    isSelected={selectedMessageIds.has(message._id)}
+                                    onSelect={(id) => {
+                                        setSelectedMessageIds(prev => {
+                                            const next = new Set(prev);
+                                            if (next.has(id)) next.delete(id);
+                                            else next.add(id);
+                                            return next;
+                                        });
+                                    }}
+                                    currentUserId={currentUserId}
+                                    meId={me?._id}
+                                    otherMemberReadId={otherMemberReadId}
+                                    onReply={onReply}
+                                    onEdit={onEdit}
+                                    onDelete={onDelete}
+                                    onReaction={onReaction}
+                                    onStar={onStar}
+                                    onPin={onPin}
+                                    onCopy={onCopy}
+                                    onForward={(msg) => {
+                                        setMessagesToForward([msg]);
+                                        setForwardDialogOpen(true);
+                                    }}
+                                    onScrollToReply={handleScrollToReply}
+                                    setIsSelectMode={setIsSelectMode}
+                                    showName={!isConsecutive}
+                                    showAvatar={isLastInGroup}
+                                />
+                            </motion.div>
+                        );
+                    })}
                 </AnimatePresence>
                 {typingUsers && typingUsers.length > 0 && (
                     <div className="flex items-end gap-2 group flex-row w-full animate-in fade-in slide-in-from-bottom-2 px-5">

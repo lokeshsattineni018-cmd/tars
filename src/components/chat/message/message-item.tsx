@@ -28,7 +28,9 @@ interface MessageItemProps {
     onCopy: (text: string) => void;
     onForward: (msg: any) => void;
     onScrollToReply: (replyToId: string) => void;
-    setIsSelectMode: (val: boolean) => void;
+    setIsSelectMode: (mode: boolean) => void;
+    showName?: boolean;
+    showAvatar?: boolean;
 }
 
 export const MessageItem = memo(function MessageItem({
@@ -49,7 +51,9 @@ export const MessageItem = memo(function MessageItem({
     onCopy,
     onForward,
     onScrollToReply,
-    setIsSelectMode
+    setIsSelectMode,
+    showName = true,
+    showAvatar = true
 }: MessageItemProps) {
     const sender = message.sender;
     const isEditable = useMemo(() =>
@@ -83,16 +87,20 @@ export const MessageItem = memo(function MessageItem({
                 isMe ? "flex-row-reverse" : "flex-row"
             )}>
                 {!isMe && (
-                    <Avatar className="h-8 w-8">
-                        <AvatarImage src={sender?.imageUrl} />
-                        <AvatarFallback>{sender?.name?.[0]}</AvatarFallback>
-                    </Avatar>
+                    <div className="w-8 flex-shrink-0">
+                        {showAvatar && (
+                            <Avatar className="h-8 w-8">
+                                <AvatarImage src={sender?.imageUrl} />
+                                <AvatarFallback>{sender?.name?.[0]}</AvatarFallback>
+                            </Avatar>
+                        )}
+                    </div>
                 )}
                 <div className={cn(
                     "flex flex-col max-w-[70%] sm:max-w-[80%]",
                     isMe ? "items-end" : "items-start"
                 )}>
-                    {!isMe && (
+                    {!isMe && showName && (
                         <span className="text-[10px] text-zinc-500 mb-1 ml-1 self-start">
                             {sender?.name}
                         </span>
