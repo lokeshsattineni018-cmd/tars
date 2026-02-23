@@ -32,6 +32,9 @@ export function MessageInput({
     const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
     const [recordingTime, setRecordingTime] = useState(0);
 
+    const [selectedImage, setSelectedImage] = useState<File | null>(null);
+    const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
+
     const imageInputRef = useRef<HTMLInputElement>(null);
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const chunksRef = useRef<BlobPart[]>([]);
@@ -169,9 +172,28 @@ export function MessageInput({
         }
     };
 
-    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
+
+        setSelectedImage(file);
+        setImagePreviewUrl(URL.createObjectURL(file));
+        setSendError(null);
+    };
+
+    const cancelImagePreview = () => {
+        setSelectedImage(null);
+        if (imagePreviewUrl) {
+            URL.revokeObjectURL(imagePreviewUrl);
+            setImagePreviewUrl(null);
+        }
+        if (imageInputRef.current) {
+            imageInputRef.current.value = "";
+        }
+    };
+
+    const confirmAndSendImage = async () => {
+        if (!selectedImage) return;
 
         try {
             setIsUploading(true);
@@ -179,8 +201,8 @@ export function MessageInput({
             const postUrl = await generateUploadUrl();
             const result = await fetch(postUrl, {
                 method: "POST",
-                headers: { "Content-Type": file.type },
-                body: file,
+                headers: { "Content-Type": selectedImage.type },
+                body: selectedImage,
             });
 
             if (!result.ok) {
@@ -197,14 +219,13 @@ export function MessageInput({
             });
 
             if (onCancelReply) onCancelReply();
+            cancelImagePreview();
         } catch (error) {
             console.error("Failed to upload image:", error);
             setSendError("Failed to upload image. Please try again.");
+            cancelImagePreview();
         } finally {
             setIsUploading(false);
-            if (imageInputRef.current) {
-                imageInputRef.current.value = "";
-            }
         }
     };
 
@@ -255,6 +276,38 @@ export function MessageInput({
                     </button>
                 </div>
             )}
+            {selectedImage && imagePreviewUrl && (
+                <div className="fixed inset-0 z-[100] bg-black/95 flex flex-col animate-in fade-in duration-200">
+                    <div className="flex items-center justify-between p-4 bg-gradient-to-b from-black/60 to-transparent">
+                        <button
+                            type="button"
+                            onClick={cancelImagePreview}
+                            className="p-2 text-white hover:bg-white/10 rounded-full transition-colors"
+                        >
+                            <X className="h-6 w-6" />
+                        </button>
+                    </div>
+                    <div className="flex-1 overflow-hidden flex items-center justify-center p-4">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                            src={imagePreviewUrl}
+                            alt="Preview"
+                            className="max-h-full max-w-full object-contain rounded-md"
+                        />
+                    </div>
+                    <div className="p-4 bg-gradient-to-t from-black/80 to-transparent flex items-center justify-end pb-8 sm:pb-4">
+                        <Button
+                            type="button"
+                            size="icon"
+                            onClick={confirmAndSendImage}
+                            disabled={isUploading}
+                            className="h-14 w-14 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-xl transition-transform active:scale-95"
+                        >
+                            <SendHorizonal className={cn("h-6 w-6 ml-1", isUploading && "animate-pulse")} />
+                        </Button>
+                    </div>
+                </div>
+            )}
             <form
                 onSubmit={handleSubmit}
                 className="flex items-center gap-2 px-4 py-2 transition-all w-full bg-zinc-100 dark:bg-zinc-900 rounded-full ring-1 ring-zinc-200 dark:ring-zinc-800 focus-within:ring-blue-500 shadow-sm"
@@ -264,7 +317,7 @@ export function MessageInput({
                     accept="image/*"
                     className="hidden"
                     ref={imageInputRef}
-                    onChange={handleImageUpload}
+                    onChange={handleImageSelect}
                 />
                 <Button
                     type="button"
@@ -317,7 +370,7 @@ export function MessageInput({
                                 setContent(e.target.value);
                                 setIsTyping(true);
                             }}
-                            placeholder="Message me..."
+                            placeholder="Message..."
                             className="flex-1 bg-transparent border-none focus:outline-none focus:ring-0 min-w-0 placeholder:text-zinc-400"
                             disabled={isUploading}
                         />
@@ -332,7 +385,7 @@ export function MessageInput({
                         className={cn(
                             "shrink-0 h-8 w-8 rounded-full transition-transform active:scale-95 ml-1 flex-shrink-0",
                             content.trim()
-                                ? "bg-green-600 hover:bg-green-700 text-white shadow-md"
+                                ? "bg-blue-600 hover:bg-green-700 text-white shadow-md"
                                 : "bg-zinc-200 dark:bg-zinc-800 text-zinc-500 hover:text-blue-500 hover:bg-zinc-300"
                         )}
                         disabled={isUploading}
