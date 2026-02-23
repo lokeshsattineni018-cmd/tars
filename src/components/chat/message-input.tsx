@@ -11,6 +11,7 @@ import { useTypingIndicator } from "@/hooks/use-presence";
 import { cn } from "@/lib/utils";
 import EmojiPicker from "emoji-picker-react";
 import { AnimatePresence, motion } from "framer-motion";
+import imageCompression from "browser-image-compression";
 
 export function MessageInput({
     conversationId,
@@ -193,43 +194,6 @@ export function MessageInput({
         }
     };
 
-    const compressImage = async (file: File): Promise<Blob> => {
-        return new Promise((resolve, reject) => {
-            const img = new Image();
-            const objectUrl = URL.createObjectURL(file);
-            img.onload = () => {
-                URL.revokeObjectURL(objectUrl);
-                const canvas = document.createElement("canvas");
-                let { width, height } = img;
-                const maxDim = 1280;
-
-                if (width > height && width > maxDim) {
-                    height *= maxDim / width;
-                    width = maxDim;
-                } else if (height > maxDim) {
-                    width *= maxDim / height;
-                    height = maxDim;
-                }
-
-                canvas.width = width;
-                canvas.height = height;
-                const ctx = canvas.getContext("2d");
-                if (!ctx) return reject(new Error("Failed to get canvas context"));
-
-                ctx.drawImage(img, 0, 0, width, height);
-                canvas.toBlob((blob) => {
-                    if (blob) resolve(blob);
-                    else reject(new Error("Canvas to Blob failed"));
-                }, "image/jpeg", 0.8);
-            };
-            img.onerror = (err) => {
-                URL.revokeObjectURL(objectUrl);
-                reject(err);
-            };
-            img.src = objectUrl;
-        });
-    };
-
     const confirmAndSendImage = async () => {
         const fileToUpload = selectedImage;
         if (!fileToUpload) return;
@@ -241,8 +205,14 @@ export function MessageInput({
             setIsUploading(true);
             setSendError(null);
 
-            // Compress the image before uploading (shrink 5MB+ to ~300KB)
-            const compressedBlob = await compressImage(fileToUpload);
+            // Compress using Background Web Worker (Zero Main Thread Block)
+            const options = {
+                maxSizeMB: 0.3,
+                maxWidthOrHeight: 1280,
+                useWebWorker: true,
+                fileType: "image/jpeg",
+            };
+            const compressedBlob = await imageCompression(fileToUpload, options);
 
             const postUrl = await generateUploadUrl();
             const result = await fetch(postUrl, {

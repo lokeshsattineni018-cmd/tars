@@ -54,6 +54,8 @@ export function MessageContent({ message, isMe, onScrollToReply }: MessageConten
                             src={message.imageUrl}
                             alt="Attachment"
                             className="max-w-[250px] max-h-[350px] object-cover sm:max-w-[300px] cursor-pointer hover:opacity-90 transition rounded-lg"
+                            loading="lazy"
+                            decoding="async"
                         />
                     </DialogTrigger>
                     <DialogContent className="max-w-4xl p-0 bg-transparent border-none shadow-none flex items-center justify-center [&>button]:right-0 [&>button]:top-[-40px] [&>button]:text-white">
@@ -62,6 +64,8 @@ export function MessageContent({ message, isMe, onScrollToReply }: MessageConten
                             src={message.imageUrl}
                             alt="Attachment fullscreen"
                             className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl"
+                            loading="eager"
+                            decoding="async"
                         />
                     </DialogContent>
                 </Dialog>
@@ -95,6 +99,8 @@ export function MessageContent({ message, isMe, onScrollToReply }: MessageConten
                                         src={message.linkMetadata.image}
                                         alt={message.linkMetadata.title || "Link preview"}
                                         className="w-full h-full object-cover"
+                                        loading="lazy"
+                                        decoding="async"
                                         onError={(e) => {
                                             const target = e.target as HTMLImageElement;
                                             target.style.display = 'none';
