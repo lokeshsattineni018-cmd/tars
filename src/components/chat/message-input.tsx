@@ -6,7 +6,7 @@ import { Id } from "../../../convex/_generated/dataModel";
 import { api } from "../../../convex/_generated/api";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { SendHorizonal, ImagePlus, Smile, X, Mic, Square, Trash, Pencil } from "lucide-react";
+import { SendHorizonal, ImagePlus, Smile, X, Mic, Square, Trash, Pencil, Loader2 } from "lucide-react";
 import { useTypingIndicator } from "@/hooks/use-presence";
 import { cn } from "@/lib/utils";
 import EmojiPicker from "emoji-picker-react";
@@ -228,12 +228,12 @@ export function MessageInput({
         const fileToUpload = selectedImage;
         if (!fileToUpload) return;
 
-        // Instantly drop the preview UI so the user isn't stuck waiting
-        cancelImagePreview();
-
         try {
             setIsUploading(true);
             setSendError(null);
+
+            // Yield so the browser updates the UI with the spinner
+            await new Promise((resolve) => setTimeout(resolve, 50));
 
             // Compress the image before uploading (shrink 5MB+ to ~300KB)
             const compressedBlob = await compressImage(fileToUpload);
@@ -259,6 +259,7 @@ export function MessageInput({
             });
 
             if (onCancelReply) onCancelReply();
+            cancelImagePreview();
         } catch (error) {
             console.error("Failed to upload image:", error);
             setSendError("Failed to upload image. Please try again.");
@@ -339,9 +340,13 @@ export function MessageInput({
                             size="icon"
                             onClick={confirmAndSendImage}
                             disabled={isUploading}
-                            className="h-14 w-14 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-xl transition-transform active:scale-95"
+                            className="h-14 w-14 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-xl transition-transform active:scale-95 flex items-center justify-center disabled:opacity-80"
                         >
-                            <SendHorizonal className={cn("h-6 w-6 ml-1", isUploading && "animate-pulse")} />
+                            {isUploading ? (
+                                <Loader2 className="h-7 w-7 animate-spin" />
+                            ) : (
+                                <SendHorizonal className="h-6 w-6 ml-1" />
+                            )}
                         </Button>
                     </div>
                 </div>
