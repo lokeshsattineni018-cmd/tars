@@ -140,32 +140,35 @@ export function MessageInput({
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!content.trim()) return;
+        const messageContent = content.trim();
+        if (!messageContent) return;
 
         setSendError(null);
+        setContent(""); // Clear immediately for instant feedback
+        setIsTyping(false);
+        setShowEmoji(false);
 
         try {
             if (editingMessage) {
                 await editMessage({
                     messageId: editingMessage.id,
-                    content: content.trim(),
+                    content: messageContent,
                 });
                 if (onCancelEdit) onCancelEdit();
             } else {
                 await sendMessage({
                     conversationId,
-                    content: content.trim(),
+                    content: messageContent,
                     type: "text",
                     replyToId: replyingTo?.id,
                 });
                 if (onCancelReply) onCancelReply();
             }
-            setContent("");
-            setIsTyping(false);
-            setShowEmoji(false);
         } catch (err) {
             console.error("Failed to send message:", err);
-            setSendError(content.trim());
+            // Restore content if it fails so the user doesn't lose their message
+            setContent(messageContent);
+            setSendError(messageContent);
         }
     };
 
