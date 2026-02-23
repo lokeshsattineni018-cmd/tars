@@ -1,10 +1,11 @@
 "use client";
 
+import { memo, useMemo } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn, formatMessageTime } from "@/lib/utils";
 import { Conversation } from "@/types";
 
-export function ConversationItem({
+export const ConversationItem = memo(function ConversationItem({
     conversation,
     isActive,
     onClick
@@ -16,6 +17,10 @@ export function ConversationItem({
     const otherMember = conversation.otherMember;
     const lastMessage = conversation.lastMessage;
     const unreadCount = conversation.unreadCount || 0;
+
+    const isOnline = useMemo(() =>
+        !conversation.isGroup && otherMember?.lastSeen && Date.now() - otherMember.lastSeen < 60000
+        , [conversation.isGroup, otherMember?.lastSeen]);
 
     return (
         <div
@@ -30,7 +35,7 @@ export function ConversationItem({
                     <AvatarImage src={otherMember?.imageUrl} />
                     <AvatarFallback>{otherMember?.name?.[0]}</AvatarFallback>
                 </Avatar>
-                {!conversation.isGroup && otherMember?.lastSeen && Date.now() - otherMember.lastSeen < 60000 && (
+                {isOnline && (
                     <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white dark:border-zinc-900 rounded-full" />
                 )}
             </div>
@@ -65,4 +70,4 @@ export function ConversationItem({
             </div>
         </div>
     );
-}
+});

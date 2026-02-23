@@ -2,7 +2,7 @@
 
 import { useQuery, useMutation, usePaginatedQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { Trash2, Forward, AlertTriangle, Loader2 } from "lucide-react";
@@ -35,7 +35,7 @@ export function MessageList({
         { initialNumItems: 50 }
     );
     // Reverse because the query returns newest first, but visually we want oldest at the top
-    const messages = [...results].reverse();
+    const messages = useMemo(() => [...results].reverse(), [results]);
 
     const me = useQuery(api.users.getMe);
     const conversations = useQuery(api.conversations.getConversations);
@@ -100,13 +100,13 @@ export function MessageList({
         }
     }, [messages?.length, conversationId, markAsRead]);
 
-    const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
         const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
         const isUp = scrollHeight - scrollTop - clientHeight > 100;
         setIsScrolledUp(isUp);
-    };
+    }, []);
 
-    const handleScrollToReply = (replyToId: string) => {
+    const handleScrollToReply = useCallback((replyToId: string) => {
         const container = document.getElementById(`msg-${replyToId}`);
         if (container) {
             container.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -118,17 +118,17 @@ export function MessageList({
                 }, 1200);
             }
         }
-    };
+    }, []);
 
-    const onReaction = (messageId: Id<"messages">, emoji: string) => {
+    const onReaction = useCallback((messageId: Id<"messages">, emoji: string) => {
         toggleReaction({ messageId, emoji });
-    };
+    }, [toggleReaction]);
 
-    const onDelete = (messageId: Id<"messages">, type: "everyone" | "me") => {
+    const onDelete = useCallback((messageId: Id<"messages">, type: "everyone" | "me") => {
         deleteMessage({ messageId, type });
-    };
+    }, [deleteMessage]);
 
-    const onBulkDelete = async (type: "everyone" | "me") => {
+    const onBulkDelete = useCallback(async (type: "everyone" | "me") => {
         setIsDeletingBulk(true);
         try {
             const promises = Array.from(selectedMessageIds).map(messageId =>
@@ -143,11 +143,11 @@ export function MessageList({
         } finally {
             setIsDeletingBulk(false);
         }
-    };
+    }, [selectedMessageIds, deleteMessage]);
 
-    const onStar = (messageId: Id<"messages">) => toggleStar({ messageId });
-    const onPin = (messageId: Id<"messages">) => togglePin({ messageId });
-    const onCopy = (text: string) => navigator.clipboard.writeText(text);
+    const onStar = useCallback((messageId: Id<"messages">) => toggleStar({ messageId }), [toggleStar]);
+    const onPin = useCallback((messageId: Id<"messages">) => togglePin({ messageId }), [togglePin]);
+    const onCopy = useCallback((text: string) => navigator.clipboard.writeText(text), []);
 
     if (status === "LoadingFirstPage") {
         return (

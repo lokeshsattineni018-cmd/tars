@@ -1,5 +1,6 @@
 "use client";
 
+import { memo, useMemo } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn, formatMessageTime } from "@/lib/utils";
 import { Pin, Star, CheckCircle2 } from "lucide-react";
@@ -30,7 +31,7 @@ interface MessageItemProps {
     setIsSelectMode: (val: boolean) => void;
 }
 
-export function MessageItem({
+export const MessageItem = memo(function MessageItem({
     message,
     isMe,
     isSelectMode,
@@ -51,7 +52,9 @@ export function MessageItem({
     setIsSelectMode
 }: MessageItemProps) {
     const sender = message.sender;
-    const isEditable = message.type === "text" && Date.now() - message._creationTime <= 5 * 60 * 1000;
+    const isEditable = useMemo(() =>
+        message.type === "text" && Date.now() - message._creationTime <= 5 * 60 * 1000
+        , [message.type, message._creationTime]);
 
     return (
         <div
@@ -207,4 +210,4 @@ export function MessageItem({
             </div>
         </div>
     );
-}
+});
