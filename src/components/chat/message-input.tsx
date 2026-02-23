@@ -192,17 +192,57 @@ export function MessageInput({
         }
     };
 
+    const compressImage = async (file: File): Promise<Blob> => {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement("canvas");
+                let { width, height } = img;
+                const maxDim = 1280;
+
+                if (width > height && width > maxDim) {
+                    height *= maxDim / width;
+                    width = maxDim;
+                } else if (height > maxDim) {
+                    width *= maxDim / height;
+                    height = maxDim;
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext("2d");
+                if (!ctx) return reject(new Error("Failed to get canvas context"));
+
+                ctx.drawImage(img, 0, 0, width, height);
+                canvas.toBlob((blob) => {
+                    if (blob) resolve(blob);
+                    else reject(new Error("Canvas to Blob failed"));
+                }, "image/jpeg", 0.8);
+            };
+            img.onerror = reject;
+            img.src = URL.createObjectURL(file);
+        });
+    };
+
     const confirmAndSendImage = async () => {
-        if (!selectedImage) return;
+        const fileToUpload = selectedImage;
+        if (!fileToUpload) return;
+
+        // Instantly drop the preview UI so the user isn't stuck waiting
+        cancelImagePreview();
 
         try {
             setIsUploading(true);
             setSendError(null);
+
+            // Compress the image before uploading (shrink 5MB+ to ~300KB)
+            const compressedBlob = await compressImage(fileToUpload);
+
             const postUrl = await generateUploadUrl();
             const result = await fetch(postUrl, {
                 method: "POST",
-                headers: { "Content-Type": selectedImage.type },
-                body: selectedImage,
+                headers: { "Content-Type": "image/jpeg" },
+                body: compressedBlob,
             });
 
             if (!result.ok) {
@@ -219,11 +259,9 @@ export function MessageInput({
             });
 
             if (onCancelReply) onCancelReply();
-            cancelImagePreview();
         } catch (error) {
             console.error("Failed to upload image:", error);
             setSendError("Failed to upload image. Please try again.");
-            cancelImagePreview();
         } finally {
             setIsUploading(false);
         }
