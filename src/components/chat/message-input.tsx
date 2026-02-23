@@ -196,7 +196,9 @@ export function MessageInput({
     const compressImage = async (file: File): Promise<Blob> => {
         return new Promise((resolve, reject) => {
             const img = new Image();
+            const objectUrl = URL.createObjectURL(file);
             img.onload = () => {
+                URL.revokeObjectURL(objectUrl);
                 const canvas = document.createElement("canvas");
                 let { width, height } = img;
                 const maxDim = 1280;
@@ -220,8 +222,11 @@ export function MessageInput({
                     else reject(new Error("Canvas to Blob failed"));
                 }, "image/jpeg", 0.8);
             };
-            img.onerror = reject;
-            img.src = URL.createObjectURL(file);
+            img.onerror = (err) => {
+                URL.revokeObjectURL(objectUrl);
+                reject(err);
+            };
+            img.src = objectUrl;
         });
     };
 
@@ -229,12 +234,12 @@ export function MessageInput({
         const fileToUpload = selectedImage;
         if (!fileToUpload) return;
 
+        // Instantly drop the preview UI so the user isn't stuck waiting
+        cancelImagePreview();
+
         try {
             setIsUploading(true);
             setSendError(null);
-
-            // Yield so the browser updates the UI with the spinner
-            await new Promise((resolve) => setTimeout(resolve, 50));
 
             // Compress the image before uploading (shrink 5MB+ to ~300KB)
             const compressedBlob = await compressImage(fileToUpload);
@@ -260,7 +265,6 @@ export function MessageInput({
             });
 
             if (onCancelReply) onCancelReply();
-            cancelImagePreview();
         } catch (error) {
             console.error("Failed to upload image:", error);
             setSendError("Failed to upload image. Please try again.");
