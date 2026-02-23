@@ -3,6 +3,7 @@
 import { useQuery, useMutation, usePaginatedQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { useEffect, useRef, useState, useMemo, useCallback } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { Trash2, Forward, AlertTriangle, Loader2 } from "lucide-react";
@@ -175,39 +176,54 @@ export function MessageList({
                 <div className={cn("text-center text-xs text-zinc-500 py-2 h-8 transition-opacity duration-300", status === "LoadingMore" ? "opacity-100" : "opacity-0 invisible")}>
                     Loading older messages...
                 </div>
-                {messages.map((message: any) => (
-                    <MessageItem
-                        key={message._id}
-                        message={message}
-                        isMe={message.sender?.clerkId === currentUserId}
-                        isSelectMode={isSelectMode}
-                        isSelected={selectedMessageIds.has(message._id)}
-                        onSelect={(id) => {
-                            setSelectedMessageIds(prev => {
-                                const next = new Set(prev);
-                                if (next.has(id)) next.delete(id);
-                                else next.add(id);
-                                return next;
-                            });
-                        }}
-                        currentUserId={currentUserId}
-                        meId={me?._id}
-                        otherMemberReadId={otherMemberReadId}
-                        onReply={onReply}
-                        onEdit={onEdit}
-                        onDelete={onDelete}
-                        onReaction={onReaction}
-                        onStar={onStar}
-                        onPin={onPin}
-                        onCopy={onCopy}
-                        onForward={(msg) => {
-                            setMessagesToForward([msg]);
-                            setForwardDialogOpen(true);
-                        }}
-                        onScrollToReply={handleScrollToReply}
-                        setIsSelectMode={setIsSelectMode}
-                    />
-                ))}
+                <AnimatePresence initial={false}>
+                    {messages.map((message: any) => (
+                        <motion.div
+                            key={message._id}
+                            layout
+                            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            transition={{
+                                opacity: { duration: 0.2 },
+                                layout: { type: "spring", bounce: 0.3, duration: 0.4 },
+                                y: { type: "spring", bounce: 0.4, duration: 0.5 },
+                                scale: { duration: 0.2 }
+                            }}
+                        >
+                            <MessageItem
+                                key={message._id}
+                                message={message}
+                                isMe={message.sender?.clerkId === currentUserId}
+                                isSelectMode={isSelectMode}
+                                isSelected={selectedMessageIds.has(message._id)}
+                                onSelect={(id) => {
+                                    setSelectedMessageIds(prev => {
+                                        const next = new Set(prev);
+                                        if (next.has(id)) next.delete(id);
+                                        else next.add(id);
+                                        return next;
+                                    });
+                                }}
+                                currentUserId={currentUserId}
+                                meId={me?._id}
+                                otherMemberReadId={otherMemberReadId}
+                                onReply={onReply}
+                                onEdit={onEdit}
+                                onDelete={onDelete}
+                                onReaction={onReaction}
+                                onStar={onStar}
+                                onPin={onPin}
+                                onCopy={onCopy}
+                                onForward={(msg) => {
+                                    setMessagesToForward([msg]);
+                                    setForwardDialogOpen(true);
+                                }}
+                                onScrollToReply={handleScrollToReply}
+                                setIsSelectMode={setIsSelectMode}
+                            />
+                        </motion.div>
+                    ))}
+                </AnimatePresence>
                 {typingUsers && typingUsers.length > 0 && (
                     <div className="flex items-end gap-2 group flex-row w-full animate-in fade-in slide-in-from-bottom-2 px-5">
                         <Avatar className="h-8 w-8">
