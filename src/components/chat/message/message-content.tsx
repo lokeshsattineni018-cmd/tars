@@ -1,12 +1,13 @@
 "use client";
 
-import { Forward } from "lucide-react";
+import { Forward, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
     Dialog,
     DialogContent,
     DialogTrigger,
     DialogTitle,
+    DialogClose,
 } from "@/components/ui/dialog";
 import { Message } from "@/types";
 
@@ -58,15 +59,21 @@ export function MessageContent({ message, isMe, onScrollToReply }: MessageConten
                             decoding="async"
                         />
                     </DialogTrigger>
-                    <DialogContent className="max-w-4xl p-0 bg-transparent border-none shadow-none flex items-center justify-center [&>button]:right-2 [&>button]:top-2 sm:[&>button]:right-0 sm:[&>button]:top-[-40px] [&>button]:text-white [&>button]:bg-black/50 [&>button]:hover:bg-black/70 [&>button]:p-2 [&>button]:h-10 [&>button]:w-10 [&>button]:rounded-full [&>svg]:h-6 [&>svg]:w-6">
+                    <DialogContent showCloseButton={false} className="max-w-4xl p-0 bg-transparent border-none shadow-none flex items-center justify-center">
                         <DialogTitle className="sr-only">Image Preview</DialogTitle>
-                        <img
-                            src={message.imageUrl}
-                            alt="Attachment fullscreen"
-                            className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl"
-                            loading="eager"
-                            decoding="async"
-                        />
+                        <div className="relative group">
+                            <img
+                                src={message.imageUrl}
+                                alt="Attachment fullscreen"
+                                className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl"
+                                loading="eager"
+                                decoding="async"
+                            />
+                            <DialogClose className="absolute top-3 right-3 sm:-top-12 sm:right-0 p-2.5 text-white/80 hover:text-white bg-black/50 hover:bg-black/70 backdrop-blur-md rounded-full transition-all z-50 shadow-xl focus:outline-none focus:ring-2 focus:ring-white/50">
+                                <X className="h-5 w-5" />
+                                <span className="sr-only">Close</span>
+                            </DialogClose>
+                        </div>
                     </DialogContent>
                 </Dialog>
             ) : message.type === "audio" && message.audioUrl ? (
