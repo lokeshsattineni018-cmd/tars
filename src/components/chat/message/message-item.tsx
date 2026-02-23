@@ -51,6 +51,7 @@ export function MessageItem({
     setIsSelectMode
 }: MessageItemProps) {
     const sender = message.sender;
+    const isEditable = message.type === "text" && Date.now() - message._creationTime <= 5 * 60 * 1000;
 
     return (
         <div
@@ -115,7 +116,7 @@ export function MessageItem({
                                 onCopy={() => onCopy(message.content)}
                                 onReply={() => onReply({ id: message._id, content: message.content, senderName: sender?.name || "Unknown" })}
                                 onEdit={
-                                    (message.type === "text" && Date.now() - message._creationTime <= 5 * 60 * 1000 && onEdit)
+                                    (isEditable && onEdit)
                                         ? () => onEdit({ id: message._id, content: message.content })
                                         : undefined
                                 }
