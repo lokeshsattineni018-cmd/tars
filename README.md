@@ -1,81 +1,41 @@
 🚀 Tars Chat
 
-A modern, full-featured real-time chat application built with Next.js, Convex, and Clerk.
+A modern real-time chat application built with Next.js, Convex, and Clerk.
 
-Tars Chat delivers a seamless real-time messaging experience with authentication, rich media support, presence tracking, and a beautifully designed responsive UI.
+Tars Chat provides instant messaging, rich media support, presence tracking, and a sleek responsive UI.
 
-🌟 Features
-💬 Real-Time Messaging
+✨ Features
 
-Instant message delivery and synchronization using Convex
+⚡ Real-time messaging with live updates
 
-Live typing indicators
+👀 Typing indicators & read receipts
 
-Read receipts
+🟢 Online/offline & last seen tracking
 
-Real-time online/offline status
+😀 Emoji reactions, replies, forwards
 
-"Last seen" tracking
+✏️ Edit, delete & pin messages
 
-🎨 Interactive Chat Experience
+🔗 Automatic rich link previews
 
-Emoji reactions
+🖼️ Image & voice message support
 
-Reply to specific messages
+👥 Direct & group chats
 
-Forward messages
+🔐 Secure authentication (Clerk)
 
-Edit or delete sent messages
-
-Pin important messages
-
-Automatic rich link previews with metadata extraction
-
-🖼️ Rich Media Support
-
-Text messages
-
-Image sharing (with client-side compression)
-
-Voice/audio messages
-
-👥 Direct & Group Chats
-
-1-to-1 private messaging
-
-Multi-user group conversations
-
-🔐 Authentication & Security
-
-Secure authentication powered by Clerk
-
-Protected routes
-
-Session management
-
-⚡ Performance Optimized
-
-Client-side image compression before upload
-
-Optimized real-time updates with Convex
-
-Efficient rendering using React 19
-
-🎨 Modern UI/UX
-
-Tailwind CSS styling
-
-shadcn/ui + Radix UI components
-
-Smooth animations using Framer Motion
-
-Fully responsive design
+🎨 Modern responsive UI
 
 🛠️ Tech Stack
-Category	Technology
-Framework	Next.js (App Router, React 19)
-Backend & Real-time Database	Convex
-Authentication	Clerk
-Styling	Tailwind CSS
-UI Components	shadcn/ui + Radix UI
-Animations	Framer Motion
+
+Frontend: Next.js (App Router, React 19)
+
+Backend: Convex (Real-time database)
+
+Auth: Clerk
+
+Styling: Tailwind CSS
+
+UI: shadcn/ui + Radix UI
+
+Animations: Framer Motion
